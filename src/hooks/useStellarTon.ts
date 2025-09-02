@@ -9,6 +9,7 @@ import {
   Account,
   Horizon,
 } from '@stellar/stellar-sdk';
+import { Buffer } from 'buffer';
 
 const { Server } = Horizon;
 
@@ -70,8 +71,15 @@ export const useStellarTon = (): UseStellarTonReturn => {
   const getStellarAddressFromTonPublicKey = useCallback((tonPublicKey: string): string => {
     // Para este PoC, vamos gerar um keypair determinístico baseado na chave TON
     // Em produção, você implementaria uma conversão real ou mapeamento
-    const seed = tonPublicKey.slice(0, 32).padEnd(32, '0');
-    const keypair = Keypair.fromRawEd25519Seed(Buffer.from(seed, 'hex'));
+    
+    // Criar um seed de 32 bytes a partir da chave TON
+    const seedString = tonPublicKey.slice(0, 64).padEnd(64, '0');
+    const seedBuffer = Buffer.from(seedString, 'hex');
+    
+    // Garantir que temos exatamente 32 bytes
+    const seed32Bytes = seedBuffer.subarray(0, 32);
+    
+    const keypair = Keypair.fromRawEd25519Seed(seed32Bytes);
     return keypair.publicKey();
   }, []);
 

@@ -11,6 +11,7 @@ import {
   Title,
   Button,
   Input,
+  Card,
 } from '@telegram-apps/telegram-ui';
 import type { FC } from 'react';
 import { useState } from 'react';
@@ -159,11 +160,73 @@ export const TONConnectPage: FC = () => {
           ]}
         />
 
-        <Section header="Stellar Integration">
+        {/* Dashboard de Saldos */}
+        <Section header="💰 Saldos Stellar">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', padding: '16px' }}>
+            <Card style={{ padding: '20px', textAlign: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', borderRadius: '12px' }}>
+              <Title level="3" style={{ margin: '0 0 8px 0', color: 'white' }}>Testnet</Title>
+              <Text style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>
+                {testnetBalance !== null ? `${testnetBalance} XLM` : '-- XLM'}
+              </Text>
+            </Card>
+            
+            <Card style={{ padding: '20px', textAlign: 'center', background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: 'white', borderRadius: '12px' }}>
+              <Title level="3" style={{ margin: '0 0 8px 0', color: 'white' }}>Mainnet</Title>
+              <Text style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>
+                {mainnetBalance !== null ? `${mainnetBalance} XLM` : '-- XLM'}
+              </Text>
+            </Card>
+          </div>
+          
+          <div style={{ padding: '0 16px 16px' }}>
+            <Button 
+              onClick={handleCheckBalances} 
+              disabled={isLoading}
+              style={{ 
+                width: '100%', 
+                marginBottom: '12px',
+                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                border: 'none',
+                borderRadius: '8px'
+              }}
+            >
+              {isLoading ? '🔄 Verificando...' : '🔄 Atualizar Saldos'}
+            </Button>
+            
+            <Button 
+              onClick={handleFundTestnet}
+              disabled={isLoading}
+              style={{ 
+                width: '100%',
+                background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                border: 'none',
+                borderRadius: '8px'
+              }}
+            >
+              {isLoading ? '💧 Adicionando...' : '💧 Financiar Testnet (Friendbot)'}
+            </Button>
+          </div>
+        </Section>
+        
+        {/* Seção de Endereços */}
+        <Section header="🔑 Endereços Stellar">
           <Cell>
             <div style={{ padding: '16px' }}>
-              <Title level="3">Endereço Stellar</Title>
-              <Text style={{ marginBottom: '8px' }}>Derivado da TON: {derivedStellarAddress}</Text>
+              <div style={{ marginBottom: '16px', padding: '12px', background: '#f8f9fa', borderRadius: '8px' }}>
+                <Text style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Derivado da TON:</Text>
+                <Text style={{ fontFamily: 'monospace', fontSize: '14px', wordBreak: 'break-all' }}>
+                  {derivedStellarAddress}
+                </Text>
+              </div>
+              
+              {stellarAddress && (
+                <div style={{ marginBottom: '16px', padding: '12px', background: '#e8f5e8', borderRadius: '8px' }}>
+                  <Text style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Customizado:</Text>
+                  <Text style={{ fontFamily: 'monospace', fontSize: '14px', wordBreak: 'break-all' }}>
+                    {stellarAddress}
+                  </Text>
+                </div>
+              )}
               
               <Input
                 header="Ou use um endereço personalizado:"
@@ -173,113 +236,113 @@ export const TONConnectPage: FC = () => {
                 style={{ marginBottom: '16px' }}
               />
               
-              <Button
-                size="s"
+              <Button 
                 onClick={handleGenerateNewKeypair}
-                style={{ marginBottom: '16px', marginRight: '8px' }}
+                style={{ 
+                  width: '100%',
+                  background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                  border: 'none',
+                  borderRadius: '8px'
+                }}
               >
-                Gerar Novo Keypair
-              </Button>
-              
-              <Button
-                size="s"
-                onClick={handleCheckBalances}
-                disabled={isLoading}
-                style={{ marginBottom: '16px' }}
-              >
-                {isLoading ? 'Verificando...' : 'Verificar Saldos'}
+                🎲 Gerar Novo Keypair
               </Button>
             </div>
           </Cell>
         </Section>
-
-        {(testnetBalance !== null || mainnetBalance !== null) && (
-          <DisplayData
-            header="Saldos XLM"
-            rows={[
-              { title: 'Testnet', value: `${testnetBalance || '0'} XLM` },
-              { title: 'Mainnet', value: `${mainnetBalance || '0'} XLM` },
-            ]}
-          />
-        )}
-
-        <Section header="Funding Testnet">
-          <Cell>
-            <div style={{ padding: '16px' }}>
-              <Text style={{ marginBottom: '16px' }}>Adicione 10,000 XLM na testnet via Friendbot</Text>
-              <Button
-                size="s"
-                onClick={handleFundTestnet}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Adicionando...' : 'Adicionar Fundos Testnet'}
-              </Button>
+        
+        {/* Seção de Transações */}
+        <Section header="💸 Enviar XLM">
+          <div style={{ padding: '16px' }}>
+            {/* Seletor de Rede */}
+            <div style={{ marginBottom: '16px' }}>
+              <Text style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Rede:</Text>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Button
+                  onClick={() => setSendNetwork('testnet')}
+                  style={{
+                    flex: 1,
+                    background: sendNetwork === 'testnet' ? '#667eea' : '#e9ecef',
+                    color: sendNetwork === 'testnet' ? 'white' : '#495057',
+                    border: 'none',
+                    borderRadius: '8px'
+                  }}
+                >
+                  🧪 Testnet
+                </Button>
+                <Button
+                  onClick={() => setSendNetwork('mainnet')}
+                  style={{
+                    flex: 1,
+                    background: sendNetwork === 'mainnet' ? '#f5576c' : '#e9ecef',
+                    color: sendNetwork === 'mainnet' ? 'white' : '#495057',
+                    border: 'none',
+                    borderRadius: '8px'
+                  }}
+                >
+                  🌐 Mainnet
+                </Button>
+              </div>
             </div>
-          </Cell>
-        </Section>
-
-        <Section header="Enviar XLM">
-          <Cell>
-            <div style={{ padding: '16px' }}>
+            
+            {/* Inputs de Transação */}
+            <div style={{ background: '#f8f9fa', padding: '16px', borderRadius: '12px', marginBottom: '16px' }}>
               <Input
-                header="Endereço de Destino:"
+                header="📍 Endereço de Destino"
                 placeholder="GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
                 value={sendToAddress}
                 onChange={(e) => setSendToAddress(e.target.value)}
-                style={{ marginBottom: '16px' }}
+                style={{ marginBottom: '12px', borderRadius: '8px' }}
               />
               
               <Input
-                header="Valor (XLM):"
+                header="💰 Quantidade (XLM)"
                 placeholder="10.5"
                 value={sendAmount}
                 onChange={(e) => setSendAmount(e.target.value)}
-                style={{ marginBottom: '16px' }}
+                style={{ marginBottom: '12px', borderRadius: '8px' }}
               />
               
               <Input
-                header="Memo (opcional):"
-                placeholder="Mensagem da transação"
+                header="📝 Memo (opcional)"
+                placeholder="Descrição da transação"
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
-                style={{ marginBottom: '16px' }}
+                style={{ marginBottom: '0', borderRadius: '8px' }}
               />
-              
-              <div style={{ marginBottom: '16px' }}>
-                <Text>Rede:</Text>
-                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                  <Button
-                    size="s"
-                    mode={sendNetwork === 'testnet' ? 'filled' : 'outline'}
-                    onClick={() => setSendNetwork('testnet')}
-                  >
-                    Testnet
-                  </Button>
-                  <Button
-                    size="s"
-                    mode={sendNetwork === 'mainnet' ? 'filled' : 'outline'}
-                    onClick={() => setSendNetwork('mainnet')}
-                  >
-                    Mainnet
-                  </Button>
-                </div>
-              </div>
-              
-              <Button
-                size="s"
-                onClick={handleSendXLM}
-                disabled={isLoading || !sendToAddress || !sendAmount}
-              >
-                {isLoading ? 'Enviando...' : 'Enviar XLM'}
-              </Button>
             </div>
-          </Cell>
+            
+            <Button 
+              onClick={handleSendXLM}
+              disabled={isLoading || !sendToAddress || !sendAmount}
+              style={{
+                width: '100%',
+                background: 'linear-gradient(135deg, #ff6b6b 0%, #feca57 100%)',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '12px',
+                fontSize: '16px',
+                fontWeight: 'bold'
+              }}
+            >
+              {isLoading ? '🚀 Enviando...' : '🚀 Enviar XLM'}
+            </Button>
+          </div>
         </Section>
 
+        {/* Status e Erros */}
         {error && (
-          <Section header="Erro">
+          <Section>
             <Cell>
-              <Text style={{ color: 'red', padding: '16px' }}>{error}</Text>
+              <div style={{ 
+                padding: '16px', 
+                background: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)', 
+                borderRadius: '12px',
+                margin: '16px'
+              }}>
+                <Text style={{ color: '#721c24', fontWeight: 'bold' }}>❌ Erro:</Text>
+                <Text style={{ color: '#721c24', marginTop: '4px' }}>{error}</Text>
+              </div>
             </Cell>
           </Section>
         )}

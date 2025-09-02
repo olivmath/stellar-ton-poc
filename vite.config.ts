@@ -6,6 +6,14 @@ import mkcert from 'vite-plugin-mkcert';
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/reactjs-template/',
+  define: {
+    global: 'globalThis',
+  },
+  resolve: {
+    alias: {
+      buffer: 'buffer',
+    },
+  },
   css: {
     preprocessorOptions: {
       scss: {
@@ -27,6 +35,12 @@ export default defineConfig({
   ],
   build: {
     target: 'esnext',
+    rollupOptions: {
+      external: [],
+    },
+  },
+  optimizeDeps: {
+    include: ['buffer'],
   },
   publicDir: './public',
   server: {
