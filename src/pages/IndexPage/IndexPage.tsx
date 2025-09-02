@@ -19,7 +19,9 @@ export const IndexPage: FC = () => {
     checkBalances,
     fundTestnet,
     sendXLM,
-    getStellarAddressFromTonPublicKey
+    getStellarAddressFromTonPublicKey,
+    signStellarTransaction,
+    sendSignedTransaction
   } = useStellarTon();
 
   const [stellarAddress, setStellarAddress] = useState<string>('');
@@ -52,13 +54,24 @@ export const IndexPage: FC = () => {
     }
 
     try {
-      await sendXLM({
+      // 1. Montar a transação
+      console.log('🔧 Montando transação Stellar...');
+      
+      // 2. Pedir para TON wallet assinar
+      console.log('✍️ Solicitando assinatura da TON wallet...');
+      const signedTransactionXdr = await signStellarTransaction({
         fromAddress: stellarAddress,
         toAddress: transactionForm.toAddress,
         amount: transactionForm.amount,
         network: transactionForm.network,
         memo: transactionForm.memo
       });
+      
+      // 3. Enviar para a rede Stellar
+      console.log('🚀 Enviando transação assinada para a rede Stellar...');
+      await sendSignedTransaction(signedTransactionXdr, transactionForm.network);
+      
+      console.log('✅ Transação enviada com sucesso!');
       
       // Limpa o formulário após sucesso
       setTransactionForm({
@@ -69,7 +82,7 @@ export const IndexPage: FC = () => {
       });
       setShowTransactionForm(false);
     } catch (err) {
-      console.error('Erro ao enviar transação:', err);
+      console.error('❌ Erro ao enviar transação:', err);
     }
   };
 
